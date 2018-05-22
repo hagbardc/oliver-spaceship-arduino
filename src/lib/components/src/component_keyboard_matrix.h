@@ -3,6 +3,7 @@
 
 #include <component_base.h>
 
+#include <Arduino.h>
 
 #include <ArduinoJson.h>
 
@@ -13,16 +14,18 @@ class ComponentKeyboardMatrix : public ComponentBase
     * These button/switches will support isPresssed / unPressed semantics,
     * providing a state change in either direction
     *
-    * @param numberOfButtons - The number of buttons/switches we're expected to support
-    * @param pinStart - The digital I/O pin starting place for the matrix
+    * @param matrixSize - The size of one side of the (square) matrix
+    * @param columnPinStart - The digital I/O pin starting place for column reads
+    * @param rowPinStart - The digital I/O pin starting place for row reads
     *
     * e.g.
-    *     ComponentBase *matrix = new ComponentKeyboardMatrix(10, 5);
+    *     ComponentBase *matrix = new ComponentKeyboardMatrix(4, 5, 14);
     *
-    * Would create a 4x4 matrix (since 4x4 is the smallest required to support 10
-    * switches) which utilizes pins D5 - D20
+    * Would create a 4x4 matrix, which utilizes pins D5 - D8 and D14 - D17
     */
-    ComponentKeyboardMatrix(int numberOfButtons, int pinStart);
+    ComponentKeyboardMatrix(int matrixSize,
+                            int columnPinStart, int rowPinStart);
+
     ~ComponentKeyboardMatrix();
 
     virtual int getStateChange(JsonObject &jsonState);
@@ -41,14 +44,30 @@ private:
         0,0     0,1     0,2
         1,0     1,1     1,2
     */
-    int at(int x, int y);
+    int at(int x, int y, int *buttonArray);
+    int at_old(int x, int y) { return at(x, y, m_buttonArrayStateOld); }
+    int at_current(int x, int y) {return at(x, y, m_buttonArrayStateCurrent); }
 
-    int m_numberOfButtons;
+    void setAt(int x, int y, int state, int*buttonArray);
+
+    void readMatrix();
+
     int m_matrixSize;  // one side of the matrix
+    int m_columnPinStart;
+    int m_rowPinStart;
 
     //  Exposing the 'matrix' as an array will make memory management easier.
     //  We'll just build an ->at() accessor to the matrix
-    int *m_buttonArray;
+
+    //  We keep two arrays which will track the button array states, since
+    //  we want to limit the amount of data that's sent out in a state change.
+    int *m_buttonArrayStateOld;
+    int *m_buttonArrayStateCurrent;
+
+    // If we note that there is a state change during ->step(), this gets
+    // set to true.  We will only attempt to build a state change JSON object
+    // if this is true
+    bool m_hasStateChange;
 };
 
 
