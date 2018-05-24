@@ -1,39 +1,32 @@
 #include <Arduino.h>
 
-#include <component_sample.h>
 #include <ArduinoJson.h>
+#include <component_base.h>
+#include <component_keyboard_matrix.h>
 
-ComponentSample cs;
+ComponentBase *keyboardMatrix;
+
 int ledPin = LED_BUILTIN;
 
 StaticJsonBuffer<1200> jsonBuffer;
-JsonObject& jo = jsonBuffer.createObject();
+JsonObject& root = jsonBuffer.createObject();
+//JsonObject& keyboardMatrixJson = root.createObjet()
 long count = 0;
 
 void setup() {
 
     Serial.begin(9600);
 
-    pinMode(LED_BUILTIN, OUTPUT);
-    Serial.print("Value is");
+    keyboardMatrix = new ComponentKeyboardMatrix(3, 5, 10);
 
 
 }
 
 void loop() {
-    if(count == 0) {
-        Serial.println("Writing high");
-        digitalWrite(ledPin, HIGH);
-    }
 
-    if( count % 10000 == 0) {
-        Serial.println(count);
-    }
-    ++count;
-
-    if(count > 50000) {
-        count = -50000;
-        Serial.println("Writing low");
-        digitalWrite(ledPin, LOW);
+    keyboardMatrix->step();
+    int kMHasStateChange = keyboardMatrix->getStateChange(jo);
+    if(kMHasStateChange) {
+        // TODO: Publish the state change over the serial connection
     }
 }
