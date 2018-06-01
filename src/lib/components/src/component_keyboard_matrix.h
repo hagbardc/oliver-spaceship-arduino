@@ -9,6 +9,8 @@
 
 class ComponentKeyboardMatrix : public ComponentBase
 {
+public:
+
     /*
     * Create a keyboard matrix with a paricular number buttons
     * These button/switches will support isPresssed / unPressed semantics,
@@ -30,12 +32,15 @@ class ComponentKeyboardMatrix : public ComponentBase
 
     virtual int getStateChange(JsonObject &jsonState);
 
-    virtual void getCurrentState(JsonObject &jsonState);
+    virtual void getCurrentState(JsonObject &jsonState) {};
 
     // The ->step functionality for the keyboard matrix is an interesting
     // one.  We need to decide if this will be implemented as a blocking step
     // or something that respects the tick...
     virtual void step();
+
+    // Prints representation of matrix to Serial
+    void printMatrix();
 
 private:
 
@@ -50,6 +55,13 @@ private:
 
     void setAt(int x, int y, int state, int*buttonArray);
 
+    /*
+    *   Does a full scan of the rows and columns, and pushes the results to
+    *   m_buttonArrayStateCurrent
+    *
+    *   While the results are being pushed to the current button array, will
+    *   set m_hasStateChange to true if there is a difference
+    */
     void readMatrix();
 
     int m_matrixSize;  // one side of the matrix

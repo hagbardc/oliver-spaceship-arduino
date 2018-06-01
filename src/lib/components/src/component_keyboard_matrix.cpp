@@ -2,6 +2,8 @@
 
 #include <math.h>
 
+#include <Arduino.h>
+
 ComponentKeyboardMatrix::ComponentKeyboardMatrix(
     int matrixSize,
     int columnPinStart,
@@ -44,16 +46,42 @@ void ComponentKeyboardMatrix::setAt(int x, int y, int state, int*buttonArray)
 
 void ComponentKeyboardMatrix::step()
 {
-    // Do a full scan of the buttons
-
-        // Put the button state into m_buttonArrayStateCurrent
-
-        // Check the button state against the m_buttonArrayStateOld Matrix
-        // if there is a change, set m_hasStateChange to true
-
-    // Actually querying for and publishing a state change should be the
-    // responsibility of another component (the main loop, probably)
+    // Do a full scan of the buttons and set the state
+        this->readMatrix();
 }
+
+void ComponentKeyboardMatrix::printMatrix()
+{
+    for(int y=0; y<m_matrixSize; ++y) {
+        for(int x=0; x<m_matrixSize; ++x) {
+            Serial.print(this->at_current(x, y));
+            Serial.print(" ");
+        }
+        Serial.println("");
+    }
+}
+
+int ComponentKeyboardMatrix::getStateChange(JsonObject &jsonState)
+{
+    if(! this->m_hasStateChange) {
+        return 0;
+    }
+
+    // Loop over
+    for(int ii=0; ii<(m_matrixSize*m_matrixSize); ++ii) {
+        if(this->m_buttonArrayStateOld[ii] == this->m_buttonArrayStateCurrent[ii] ) {
+            continue;
+        }
+
+        // TODO: Add the state transition to the JSON object
+
+        this->m_buttonArrayStateOld[ii] = this->m_buttonArrayStateCurrent[ii];
+    }
+
+    this->m_hasStateChange = false;
+    return 1;
+}
+
 
 
 void ComponentKeyboardMatrix::readMatrix() {
@@ -70,6 +98,9 @@ void ComponentKeyboardMatrix::readMatrix() {
             pinMode(rowCol, INPUT_PULLUP);
 
             setAt(rowIndex, colIndex,  digitalRead(rowCol), m_buttonArrayStateCurrent);
+            if(this->at_old(rowIndex, colIndex) != this->at_current(rowIndex, colIndex)) {
+                this->m_hasStateChange = true;
+            }
 
             pinMode(rowCol, INPUT);
         }
