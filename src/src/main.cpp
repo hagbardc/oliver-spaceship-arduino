@@ -2,15 +2,15 @@
 
 #include <component_button_pad.h>
 #include <component_base.h>
-//#include <ArduinoJson.h>
+#include <ArduinoJson.h>
 
 ComponentBase *buttonPad;
 unsigned long count = millis()+1000;
 
 
-//StaticJsonBuffer<1200> jsonBuffer;
-///JsonObject& jo = jsonBuffer.createObject();
-//long count = 0;
+StaticJsonBuffer<1200> jsonBuffer;
+JsonObject& jo = jsonBuffer.createObject();
+
 
 void setup()
 {
@@ -21,7 +21,7 @@ void setup()
 
     uint8_t colorPins[4][3]  = {{22,24,26}, {30,31,32},{33,34,35},{36,37,38}};
     buttonPad = new ComponentButtonPad(50, 46, 42, colorPins);
-    Serial.print("Ending Setup...");
+    Serial.println("Ending Setup...");
 }
 
 void loop() {
@@ -29,5 +29,6 @@ void loop() {
         //Serial.println("Calling step");
         count = millis()+1000;
     }
-    buttonPad->step();
+
+    buttonPad->step(jo);
 }

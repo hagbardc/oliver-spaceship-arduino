@@ -44,7 +44,7 @@ void ComponentKeyboardMatrix::setAt(int x, int y, int state, int*buttonArray)
 }
 
 
-void ComponentKeyboardMatrix::step()
+void ComponentKeyboardMatrix::step(JsonObject &json)
 {
     // Do a full scan of the buttons and set the state
         this->readMatrix();

@@ -14,10 +14,10 @@ public:
 
     virtual void getCurrentState(JsonObject &jsonState);
 
-    virtual void step();
+    virtual void step(JsonObject &json);
 
 private:
-    int m_isPressed;    
+    int m_isPressed;
 };
 
 #endif

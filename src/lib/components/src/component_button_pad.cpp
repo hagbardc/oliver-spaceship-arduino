@@ -1,12 +1,13 @@
 #include <component_button_pad.h>
 
+#include <stdio.h>
 
 ComponentButtonPad::ComponentButtonPad( uint8_t buttonSelectPinStart,
                                         uint8_t buttonReadPinStart,
                                         uint8_t ledSelectPinStart,
                                         uint8_t colorPins[4][3]) : m_currentColumn(0)
 {
-
+    snprintf(this->m_componentName, sizeof(this->m_componentName), "ButtonMatrix");
     for(int ii=0; ii<ComponentButtonPad::NUM_LED_COLUMNS; ++ii) {
         this->m_btnSelectPins[ii] = buttonSelectPinStart+ii;
         this->m_btnReadPins[ii] = buttonReadPinStart+ii;
@@ -78,9 +79,11 @@ void ComponentButtonPad::setupPins()
     }
 }
 
-void ComponentButtonPad::scan()
+void ComponentButtonPad::scan(JsonObject &json)
 {
-
+    static char elementName[20];
+    static char actionName[20];
+    static char value[20];
     //  Ensure that we don't scan more than once every millisecond
     if(millis() < this->m_nextScan) {
         //Serial.println("Returning from scan");
@@ -119,10 +122,21 @@ void ComponentButtonPad::scan()
         m_debounceCount[m_currentColumn][j]++;
         if( m_debounceCount[m_currentColumn][j] == MAX_DEBOUNCE )
         {
-          Serial.print("Key Down ");
-          Serial.println((m_currentColumn * NUM_BTN_ROWS) + j);
-
           m_ledOutputs[m_currentColumn][j]++;
+
+          //  This ensures that we can use m_ledOutputs as a reliable current state
+          //  I think if we didn't wrap around like this there's a possibility of
+          //  an overrun bug
+          if(m_ledOutputs[m_currentColumn][j] > COLOR_MAPPING::LED_BLUE) {
+              m_ledOutputs[m_currentColumn][j] = COLOR_MAPPING::LED_OFF;
+          }
+
+          snprintf(&elementName[0], sizeof(elementName), "%s:%d", "button", ((m_currentColumn * NUM_BTN_ROWS) + j));
+          snprintf(&actionName[0], sizeof(actionName), "pressed");
+          snprintf(&value[0], sizeof(value), "%d", (m_ledOutputs[m_currentColumn][j]));
+          ComponentBase::populateStateChange(json, &elementName[0], &actionName[0], &value[0]);
+          json.printTo(Serial);
+
         }
       }
     }
@@ -134,8 +148,11 @@ void ComponentButtonPad::scan()
         m_debounceCount[m_currentColumn][j]--;
         if( m_debounceCount[m_currentColumn][j] == 0 )
         {
-          Serial.print("Key Up ");
-          Serial.println((m_currentColumn * NUM_BTN_ROWS) + j);
+          snprintf(&elementName[0], sizeof(elementName), "%s:%d", "button", ((m_currentColumn * NUM_BTN_ROWS) + j));
+          snprintf(&actionName[0], sizeof(actionName), "released");
+          snprintf(&value[0], sizeof(value), "%d", (m_ledOutputs[m_currentColumn][j]));
+          ComponentBase::populateStateChange(json, &elementName[0], &actionName[0], &value[0]);
+          json.printTo(Serial);
         }
       }
     }

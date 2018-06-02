@@ -37,7 +37,7 @@ public:
     // The ->step functionality for the keyboard matrix is an interesting
     // one.  We need to decide if this will be implemented as a blocking step
     // or something that respects the tick...
-    virtual void step();
+    virtual void step(JsonObject &json);
 
     // Prints representation of matrix to Serial
     void printMatrix();
