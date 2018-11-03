@@ -25,11 +25,27 @@ public:
 
     /*
     * Our 'tick' function - representing a cycle of the microcontroller
+    *
+    * @param json:  A JsonBuffer which can be used for emission of a state change to Serial
     */
-    virtual void step() = 0;
+    virtual void step(JsonObject &json) = 0;
+
+    /*
+     * Populates the json object with information for a state change
+     * Assumes that createObject() had already been called on json
+     *
+     * @param json:  ArduinoJson json which will be populated with the change info
+     * @param element:  Name of the changing element
+     * @param action:  Name of the event that occurred
+     * @param value:  Any value associated with that event
+    */
+    void populateStateChange(
+        JsonObject &json, const char* element,
+        const char *action, const char *value);
 
 protected:
     bool m_recentStateChange;
+    char m_componentName[20];  // Name of the component
 };
 
 

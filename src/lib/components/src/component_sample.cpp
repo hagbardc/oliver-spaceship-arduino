@@ -16,6 +16,6 @@ int ComponentSample::getStateChange(JsonObject &jsonState) {
 void ComponentSample::getCurrentState(JsonObject &jsonState) {
 }
 
-void ComponentSample::step() {
+void ComponentSample::step(JsonObject &json) {
 
 }
