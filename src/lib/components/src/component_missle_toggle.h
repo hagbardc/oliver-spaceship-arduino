@@ -9,6 +9,17 @@
 
 #include <Button.h>
 
+/*
+
+Behavior of this component is as follows:
+
+When a given toggle switch is flipped from OFF to ON, the associated LEDs
+begin to turn on in sequence, delayed by the value in the input light delay.
+
+If the switches are turned on out of order, an error state is set and the switches
+begin to
+
+*/
 class ComponentMissileToggle : public ComponentBase
 {
 public:

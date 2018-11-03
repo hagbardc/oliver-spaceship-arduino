@@ -32,3 +32,13 @@ ComponentMissileToggle::ComponentMissileToggle()
         delete m_switchList[ii];
     }
 }
+
+
+/*
+ *  
+
+ */
+void step()
+{
+
+}
